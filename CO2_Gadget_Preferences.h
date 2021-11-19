@@ -14,6 +14,7 @@ void printPreferences() {
   Serial.printf("activeBLE is:\t%s\n", ((activeBLE) ? "Enabled" : "Disabled"));
   Serial.printf("activeWIFI is:\t%s\n", ((activeWIFI) ? "Enabled" : "Disabled"));
   Serial.printf("activeMQTT is:\t%s\n", ((activeMQTT) ? "Enabled" : "Disabled"));
+  Serial.printf("activeAnaire is:\t%s\n", ((activeAnaire) ? "Enabled" : "Disabled"));
   Serial.printf("rootTopic:\t%s\n", rootTopic.c_str());
   Serial.printf("batDischgd:\t %d\n", batteryDischargedMillivolts);
   Serial.printf("batChargd:\t %d\n", batteryFullyChargedMillivolts);
@@ -42,6 +43,7 @@ void initPreferences() {
   activeBLE = preferences.getBool("activeBLE", true);
   activeWIFI = preferences.getBool("activeWIFI", false);
   activeMQTT = preferences.getBool("activeMQTT", false);
+  activeAnaire = preferences.getBool("activeAnaire", true);
   rootTopic = preferences.getString("rootTopic", rootTopic);
   mqttClientId = preferences.getString("mqttClientId", mqttClientId);
   mqttBroker = preferences.getString("mqttBroker", mqttBroker).c_str();
@@ -82,6 +84,7 @@ void putPreferences() {
   preferences.putBool("activeBLE", activeBLE);
   preferences.putBool("activeWIFI", activeWIFI);
   preferences.putBool("activeMQTT", activeMQTT);
+  preferences.putBool("activeAnaire", activeAnaire);
   preferences.putString("rootTopic", rootTopic);
   preferences.putUInt("batDischgd", batteryDischargedMillivolts);
   preferences.putUInt("batChargd", batteryFullyChargedMillivolts);

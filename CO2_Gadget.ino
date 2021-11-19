@@ -23,9 +23,10 @@ String wifiSSID     = WIFI_SSID_CREDENTIALS;
 String wifiPass     = WIFI_PW_CREDENTIALS;
 String mDNSName     = "Unset";
 
-bool activeBLE =  true;
-bool activeWIFI = true;
-bool activeMQTT = true;
+bool activeBLE    =  true;
+bool activeWIFI   = true;
+bool activeMQTT   = true;
+bool activeAnaire = true;
 
 bool bleInitialized = false;
 
@@ -78,6 +79,15 @@ uint64_t lastButtonUpTimeStamp = millis(); // Last time button UP was pressed
 /*****************************************************************************************************/
 // clang-format on
 #include "CO2_Gadget_MQTT.h"
+
+// clang-format off
+/*****************************************************************************************************/
+/*********                                                                                   *********/
+/*********                        SETUP ANAIRE CLOUD FUNCTIONALITY                           *********/
+/*********                                                                                   *********/
+/*****************************************************************************************************/
+// clang-format on
+#include "CO2_Gadget_Anaire-Cloud.h"
 
 // clang-format off
 /*****************************************************************************************************/
@@ -250,6 +260,7 @@ void setup() {
   delay(2000);              // Enjoy the splash screen for 2 seconds
   tft.setTextSize(2);
 #endif
+  initAnaireCloud();
   initBLE();
   initWifi();
   initSensors();  
@@ -263,6 +274,7 @@ void setup() {
 
 void loop() {
   mqttClientLoop();
+  mqttAnaireLoop();
   sensorsLoop();
   processPendingCommands();
   readingsLoop();
