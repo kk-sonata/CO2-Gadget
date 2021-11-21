@@ -26,7 +26,6 @@ struct MyConfigStruct {
   char anaire_device_name[24];                                // Device name; default to anaire_device_id
   // uint16_t CO2ppm_warning_threshold = 700;                    // Warning threshold; default to 700ppm
   // uint16_t CO2ppm_alarm_threshold = 1000;                     // Alarm threshold; default to 1000ppm
-  // char MQTT_server[24] = "mqtt.anaire.org";                   // MQTT server url or public IP address. Default to Anaire Portal on portal.anaire.org
   char MQTT_server[24] = "mqtt.anaire.org";                   // MQTT server url or public IP address. Default to Anaire Portal on portal.anaire.org
   uint16_t MQTT_port = 80;                                    // MQTT port; Default to Anaire Port on 30183
   // boolean acoustic_alarm = true;                              // Global flag to control acoustic alarm; default to true
@@ -293,6 +292,7 @@ void Init_MQTT() { // MQTT Init function
 
   // Attempt to connect to MQTT broker
   MQTT_client.setBufferSize(512); // to receive messages up to 512 bytes length (default is 256)
+  // MQTT_client.setServer(AnaireConfig.MQTT_server, AnaireConfig.MQTT_port);
   // MQTT_client.setServer("test.mosquitto.org", 1883);
   MQTT_client.setServer("mqtt.anaire.org", 80);
   MQTT_client.setCallback(Receive_Message_Cloud_App_MQTT);
