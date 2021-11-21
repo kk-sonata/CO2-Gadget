@@ -47,8 +47,9 @@ char tempIPAddress[16];
 // list of allowed characters
 const char *const digit = "0123456789";
 const char *const hexChars MEMMODE = "0123456789ABCDEF";
-const char *const alphaNum[] MEMMODE = {
-    " 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz.,+-_"};
+const char *const alphaNum[] MEMMODE = {" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz.,+-_"};
+const char *const allChars[] MEMMODE = {" 0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_!#@$%&/()=+-*^~:.[]{}"};
+
 const char *const reducedSet[] MEMMODE = {
     " 0123456789abcdefghijklmnopqrstuvwxyz.-_"};
 
@@ -56,6 +57,8 @@ const char *const reducedSet[] MEMMODE = {
 char tempMQTTTopic[]    = "                              ";
 char tempMQTTClientId[] = "                              ";
 char tempMQTTBrokerIP[] = "                              ";
+char tempMQTTUser[]     = "                              ";
+char tempMQTTPass[]     = "                              ";
 char tempWiFiSSID[]     = "                              ";
 char tempWiFiPasswrd[]  = "                              ";
 char tempHostName[]     = "                              ";
@@ -138,7 +141,7 @@ result doCalibration400ppm(eventMask e, navNode &nav, prompt &item) {
 
 result doCalibrationCustom(eventMask e, navNode &nav, prompt &item) {
 #ifdef DEBUG_ARDUINOMENU
-  Serial.printf("Calibrating sensor at %d/n", customCalibrationValue);
+  Serial.printf("Calibrating sensor at %d\n", customCalibrationValue);
   Serial.print("action1 event:");
   Serial.println(e);
   Serial.flush();
@@ -224,8 +227,8 @@ result doSetActiveWIFI(eventMask e, navNode &nav, prompt &item) {
 }
 
 result doSetWiFiSSID(eventMask e, navNode &nav, prompt &item) {
-#ifndef DEBUG_ARDUINOMENU
-  Serial.printf("Setting WiFi SSID to %s\n", tempWiFiSSID);
+#ifdef DEBUG_ARDUINOMENU
+  Serial.printf("Setting WiFi SSID to #%s#\n", tempWiFiSSID);
   Serial.print("action1 event:");
   Serial.println(e);
   Serial.flush();
@@ -238,8 +241,8 @@ result doSetWiFiSSID(eventMask e, navNode &nav, prompt &item) {
 }
 
 result doSetWiFiPasswrd(eventMask e, navNode &nav, prompt &item) {
-#ifndef DEBUG_ARDUINOMENU
-  Serial.printf("Setting WiFi Password to %s\n", tempWiFiPasswrd);
+#ifdef DEBUG_ARDUINOMENU
+  Serial.printf("Setting WiFi Password to #%s#\n", tempWiFiPasswrd);
   Serial.print("action1 event:");
   Serial.println(e);
   Serial.flush();
@@ -259,15 +262,15 @@ MENU(wifiConfigMenu, "WIFI Config", doNothing, noEvent, wrapStyle
   ,SUBMENU(activeWIFIMenu)  
   ,EDIT("SSID", tempWiFiSSID, alphaNum, doSetWiFiSSID, exitEvent, wrapStyle)
   #ifndef WIFI_PRIVACY
-  ,EDIT("Pass:", tempWiFiPasswrd, alphaNum, doSetWiFiPasswrd, exitEvent, wrapStyle)
+  ,EDIT("Pass:", tempWiFiPasswrd, allChars, doSetWiFiPasswrd, exitEvent, wrapStyle)
   #endif  
   ,EDIT("Host:", tempHostName, alphaNum, doNothing, noEvent, wrapStyle)
   ,EXIT("<Back"));
 
 
 result doSetMQTTTopic(eventMask e, navNode &nav, prompt &item) {
-#ifndef DEBUG_ARDUINOMENU
-  Serial.printf("Setting MQTT Topic to %s\n", tempMQTTTopic);
+#ifdef DEBUG_ARDUINOMENU
+  Serial.printf("Setting MQTT Topic to #%s#\n", tempMQTTTopic);
   Serial.print("action1 event:");
   Serial.println(e);
   Serial.flush();
@@ -283,8 +286,8 @@ result doSetMQTTTopic(eventMask e, navNode &nav, prompt &item) {
 }
 
 result doSetMQTTClientId(eventMask e, navNode &nav, prompt &item) {
-#ifndef DEBUG_ARDUINOMENU
-  Serial.printf("Setting MQTT Client Id to %s\n", tempMQTTClientId);
+#ifdef DEBUG_ARDUINOMENU
+  Serial.printf("Setting MQTT Client Id to #%s#\n", tempMQTTClientId);
   Serial.print("action1 event:");
   Serial.println(e);
   Serial.flush();
@@ -300,8 +303,8 @@ result doSetMQTTClientId(eventMask e, navNode &nav, prompt &item) {
 }
 
 result doSetMQTTBrokerIP(eventMask e, navNode &nav, prompt &item) {
-#ifndef DEBUG_ARDUINOMENU
-  Serial.printf("Setting MQTT Broker IP to: %s\n", tempMQTTBrokerIP);
+#ifdef DEBUG_ARDUINOMENU
+  Serial.printf("Setting MQTT Broker IP to: #%s#\n", tempMQTTBrokerIP);
   Serial.print("action1 event:");
   Serial.println(e);
   Serial.flush();
@@ -310,6 +313,40 @@ result doSetMQTTBrokerIP(eventMask e, navNode &nav, prompt &item) {
   if (p)     // if found truncate at space
     *p = 0;
   mqttBroker = tempMQTTBrokerIP;  
+  if ((activeMQTT) && (WiFi.isConnected())) {
+    initMQTT();
+  }
+  return proceed;
+}
+
+result doSetMQTTUser(eventMask e, navNode &nav, prompt &item) {
+#ifdef DEBUG_ARDUINOMENU
+  Serial.printf("Setting MQTT User to: #%s#\n", tempMQTTBrokerIP);
+  Serial.print("action1 event:");
+  Serial.println(e);
+  Serial.flush();
+#endif  
+  char * p = strchr (tempMQTTUser, ' ');  // search for space
+  if (p)     // if found truncate at space
+    *p = 0;
+  mqttUser = tempMQTTUser;  
+  if ((activeMQTT) && (WiFi.isConnected())) {
+    initMQTT();
+  }
+  return proceed;
+}
+
+result doSetMQTTPass(eventMask e, navNode &nav, prompt &item) {
+#ifdef DEBUG_ARDUINOMENU
+  Serial.printf("Setting MQTT Pass to: #%s#\n", tempMQTTPass);
+  Serial.print("action1 event:");
+  Serial.println(e);
+  Serial.flush();
+#endif  
+  char * p = strchr (tempMQTTPass, ' ');  // search for space
+  if (p)     // if found truncate at space
+    *p = 0;
+  mqttPass = tempMQTTPass;  
   if ((activeMQTT) && (WiFi.isConnected())) {
     initMQTT();
   }
@@ -333,7 +370,9 @@ MENU(mqttConfigMenu, "MQTT Config", doNothing, noEvent, wrapStyle
   ,SUBMENU(activeMQTTMenu)
   ,EDIT("Topic", tempMQTTTopic, alphaNum, doSetMQTTTopic, exitEvent, wrapStyle)
   ,EDIT("Id", tempMQTTClientId, alphaNum, doSetMQTTClientId, exitEvent, wrapStyle)
-  ,EDIT("IP", tempMQTTBrokerIP, reducedSet, doSetMQTTBrokerIP, exitEvent, wrapStyle)
+  ,EDIT("Broker IP", tempMQTTBrokerIP, reducedSet, doSetMQTTBrokerIP, exitEvent, wrapStyle)
+  ,EDIT("User", tempMQTTUser, alphaNum, doSetMQTTUser, exitEvent, wrapStyle)
+  ,EDIT("Pass", tempMQTTPass, alphaNum, doSetMQTTPass, exitEvent, wrapStyle)
   ,EXIT("<Back"));
 
 #if defined SUPPORT_ESPNOW
@@ -478,6 +517,94 @@ outputsList out(outputs,
 
 NAVROOT(nav, mainMenu, MAX_DEPTH, serial, out);
 
+String rightPad(String aString,uint8_t aLenght) {
+  String tempString = aString;
+  while (tempString.length()<aLenght) {
+    tempString = tempString + " ";
+  }
+  #ifdef DEBUG_ARDUINOMENU
+  Serial.print("Original String: #");
+  Serial.print(aString);
+  Serial.println("#");
+  Serial.print("Padded String: #");
+  Serial.print(tempString);
+  Serial.println("#");
+  #endif
+  return tempString;
+} 
+
+void loadTempArraysWithActualValues() {
+  String paddedString;
+
+  paddedString = rightPad(rootTopic, 30);
+  paddedString.toCharArray(tempMQTTTopic, paddedString.length());
+  #ifdef DEBUG_ARDUINOMENU
+  Serial.print("tempMQTTTopic: #");
+  Serial.print(tempMQTTTopic);
+  Serial.println("#");
+  #endif
+
+  paddedString = rightPad(mqttClientId, 30);
+  paddedString.toCharArray(tempMQTTClientId, paddedString.length());
+  #ifdef DEBUG_ARDUINOMENU
+  Serial.print("tempMQTTClientId: #");
+  Serial.print(tempMQTTClientId);
+  Serial.println("#");
+  #endif
+
+  paddedString = rightPad(mqttBroker, 30);
+  paddedString.toCharArray(tempMQTTBrokerIP, paddedString.length());
+  #ifdef DEBUG_ARDUINOMENU
+  Serial.printf("mqttBroker: #%s#\n", mqttBroker.c_str());
+  Serial.printf("mqttBroker.length(): %d\n", paddedString.length());
+  Serial.print("tempMQTTBrokerIP: #");
+  Serial.print(tempMQTTBrokerIP);
+  Serial.println("#");
+  #endif
+
+  paddedString = rightPad(mqttUser, 30);
+  paddedString.toCharArray(tempMQTTUser, paddedString.length());
+  #ifdef DEBUG_ARDUINOMENU
+  Serial.print("tempMQTTUser: #");
+  Serial.print(tempMQTTUser);
+  Serial.println("#");  
+  #endif
+
+  paddedString = rightPad(mqttPass, 30);
+  paddedString.toCharArray(tempMQTTPass, paddedString.length());
+  #ifdef DEBUG_ARDUINOMENU
+  Serial.print("tempMQTTPass: #");
+  Serial.print(tempMQTTPass);
+  Serial.println("#");
+  #endif
+
+  paddedString = rightPad(wifiSSID, 30);
+  paddedString.toCharArray(tempWiFiSSID, paddedString.length());
+  #ifdef DEBUG_ARDUINOMENU
+  Serial.print("tempWiFiSSID: #");
+  Serial.print(tempWiFiSSID);
+  Serial.println("#");
+  #endif
+
+  paddedString = rightPad(wifiPass, 30);
+  paddedString.toCharArray(tempWiFiPasswrd, paddedString.length());
+  #ifdef DEBUG_ARDUINOMENU
+  Serial.print("tempWiFiPasswrd: #");
+  Serial.print(tempWiFiPasswrd);
+  Serial.println("#");
+  #endif
+
+  paddedString = rightPad(hostName, 30);
+  paddedString.toCharArray(tempHostName, paddedString.length());
+  #ifdef DEBUG_ARDUINOMENU
+  Serial.print("tempHostName: #");
+  Serial.print(tempHostName);
+  Serial.println("#");
+  #endif
+
+  fillTempIPAddress();
+}
+
 // when menu is suspended
 result idle(menuOut &o, idleEvent e) {
 #if defined SUPPORT_TFT
@@ -498,6 +625,7 @@ result idle(menuOut &o, idleEvent e) {
     Serial.println("Event idleEnd");
     Serial.flush();
 #endif
+  loadTempArraysWithActualValues();
   } else {
 #ifdef DEBUG_ARDUINOMENU
     Serial.print("Unhandled event: ");
@@ -507,14 +635,6 @@ result idle(menuOut &o, idleEvent e) {
   }
   return proceed;
 #endif
-}
-
-String rightPad(String aString,uint8_t aLenght) {
-  String tempString = aString;
-  while (tempString.length()<aLenght) {
-    tempString = tempString + " ";
-  }
-  return tempString;
 }
 
 void menu_init() {
@@ -535,23 +655,5 @@ void menu_init() {
   }
   batteryConfigMenu[0].disable(); // Make information field unselectable
 
-  rootTopic = rightPad(rootTopic, 30);
-  rootTopic.toCharArray(tempMQTTTopic, rootTopic.length());
-
-  mqttClientId = rightPad(mqttClientId, 30);
-  mqttClientId.toCharArray(tempMQTTClientId, mqttClientId.length());
-
-  mqttBroker = rightPad(mqttBroker, 30);
-  mqttBroker.toCharArray(tempMQTTBrokerIP, mqttBroker.length());
-
-  wifiSSID = rightPad(wifiSSID, 30);
-  wifiSSID.toCharArray(tempWiFiSSID, wifiSSID.length());
-
-  wifiPass = rightPad(wifiPass, 30);
-  wifiPass.toCharArray(tempWiFiPasswrd, wifiPass.length());
-
-  hostName = rightPad(hostName, 30);
-  hostName.toCharArray(tempHostName, hostName.length());
-  
-  fillTempIPAddress();  
+  loadTempArraysWithActualValues();
 }
