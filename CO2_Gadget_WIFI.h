@@ -14,7 +14,9 @@
 #endif
 
 WiFiClient espClient;
+#ifndef DISABLE_WEBSERVER
 AsyncWebServer server(80);
+#endif
 
 void onWifiSettingsChanged(std::string ssid, std::string password) {
   Serial.print("WifiSetup: SSID = ");
@@ -78,6 +80,8 @@ void initWifi() {
     Serial.println(WiFi.localIP());
     initMDNS();
 
+
+    #ifndef DISABLE_WEBSERVER
     server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
       request->send(200, "text/html", MAIN_page);
     });
@@ -96,14 +100,17 @@ void initWifi() {
     server.onNotFound([](AsyncWebServerRequest *request) {
       request->send(400, "text/plain", "Not found");
     });
+    #endif
 
 #ifdef SUPPORT_OTA
     AsyncElegantOTA.begin(&server); // Start ElegantOTA
     Serial.println("OTA ready");
 #endif
 
+#ifndef DISABLE_WEBSERVER
     server.begin();
     Serial.println("HTTP server started");
+#endif
 
 #ifdef SUPPORT_MQTT
     mqttClientId = hostName;

@@ -30,17 +30,19 @@ uint16_t co2RedRange =
           // (user can change on menu and save on preferences)
 
 void onSensorDataOk() {
-  Serial.print("-->[MAIN] CO2: " + sensors.getStringCO2());
-  Serial.print(" CO2humi: " + String(sensors.getCO2humi()));
-  Serial.print(" CO2temp: " + String(sensors.getCO2temp()));
-
-  Serial.print(" H: " + String(sensors.getHumidity()));
-  Serial.println(" T: " + String(sensors.getTemperature()));
-
   co2 = sensors.getCO2();
   temp = sensors.getCO2temp();
   hum = sensors.getCO2humi();
   newReadingsAvailable = true;
+
+  // Serial.println("");
+  // Serial.print("-->[MAIN] CO2: " + sensors.getStringCO2());
+  // Serial.print(" CO2humi: " + String(sensors.getCO2humi()));
+  // Serial.print(" CO2temp: " + String(sensors.getCO2temp()));
+  // Serial.print(" H: " + String(sensors.getHumidity()));
+  // Serial.println(" T: " + String(sensors.getTemperature()));
+
+  Serial.printf("\n-->[MAIN] CO2: %d CO2temp: %.2f CO2humi: %.2f T: %.2f H: %.2f\n", co2, temp, hum, sensors.getTemperature(), sensors.getHumidity());
 }
 
 void onSensorDataError(const char *msg) { Serial.println(msg); }

@@ -19,7 +19,7 @@ void mqttReconnect() {
     timeStamp = millis();
     String subscriptionTopic;
     if (!mqttClient.connected()) {
-      Serial.print("Attempting MQTT connection...");
+      Serial.printf("Attempting MQTT connection to %s...\n", mqttClientId.c_str());
       // Attempt to connect            
       if (mqttClient.connect((mqttClientId).c_str(), (mqttUser).c_str(), (mqttPass).c_str())) {
         Serial.println("connected");

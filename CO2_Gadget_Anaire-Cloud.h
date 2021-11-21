@@ -24,18 +24,23 @@ String anaire_device_id;
 // Init to default values; if they have been chaged they will be readed later, on initialization
 struct MyConfigStruct {
   char anaire_device_name[24];                                // Device name; default to anaire_device_id
-  uint16_t CO2ppm_warning_threshold = 700;                    // Warning threshold; default to 700ppm
-  uint16_t CO2ppm_alarm_threshold = 1000;                     // Alarm threshold; default to 1000ppm
+  // uint16_t CO2ppm_warning_threshold = 700;                    // Warning threshold; default to 700ppm
+  // uint16_t CO2ppm_alarm_threshold = 1000;                     // Alarm threshold; default to 1000ppm
+  // char MQTT_server[24] = "mqtt.anaire.org";                   // MQTT server url or public IP address. Default to Anaire Portal on portal.anaire.org
   char MQTT_server[24] = "mqtt.anaire.org";                   // MQTT server url or public IP address. Default to Anaire Portal on portal.anaire.org
   uint16_t MQTT_port = 80;                                    // MQTT port; Default to Anaire Port on 30183
-  boolean acoustic_alarm = true;                              // Global flag to control acoustic alarm; default to true
-  boolean self_calibration = false;                           // Automatic Baseline Correction of CO2 sensor; default to false
-  uint16_t forced_recalibration_reference = 420;              // Forced Recalibration value; default to 420ppm
-  uint16_t temperature_offset = 600;                          // temperature offset for SCD30 CO2 measurements: 600 by default, because of the housing
-  uint16_t altitude_compensation = 600;                       // altitude compensation for SCD30 CO2 measurements: 600, Madrid altitude
-  char wifi_user[24];                                         // WiFi user to be used on WPA Enterprise. Default to null (not used)
-  char wifi_password[24];                                     // WiFi password to be used on WPA Enterprise. Default to null (not used)
+  // boolean acoustic_alarm = true;                              // Global flag to control acoustic alarm; default to true
+  // boolean self_calibration = false;                           // Automatic Baseline Correction of CO2 sensor; default to false
+  // uint16_t forced_recalibration_reference = 420;              // Forced Recalibration value; default to 420ppm
+  // uint16_t temperature_offset = 600;                          // temperature offset for SCD30 CO2 measurements: 600 by default, because of the housing
+  // uint16_t altitude_compensation = 600;                       // altitude compensation for SCD30 CO2 measurements: 600, Madrid altitude
+  // char wifi_user[24];                                         // WiFi user to be used on WPA Enterprise. Default to null (not used)
+  // char wifi_password[24];                                     // WiFi password to be used on WPA Enterprise. Default to null (not used)
 } AnaireConfig;
+
+// Measurements
+int CO2ppm_accumulated = 0;   // Accumulates co2 measurements for a MQTT period
+int CO2ppm_samples = 0;       // Counts de number of samples for a MQTT period
 
 // device status
 boolean err_global = false;
@@ -43,10 +48,18 @@ boolean err_wifi = false;
 boolean err_MQTT = false;
 boolean err_sensor = false;
 
+// Measurements loop: time between measurements
+unsigned int measurements_loop_duration = 10000;  // 10 seconds
+unsigned long measurements_loop_start;            // holds a timestamp for each control loop start
+
 // MQTT loop: time between MQTT measurements sent to the cloud
 unsigned int MQTT_loop_duration = 60000;          // 60 seconds
 unsigned long MQTT_loop_start;                    // holds a timestamp for each cloud loop start
 unsigned long lastReconnectAttempt = 0;           // MQTT reconnections
+
+// Errors loop: time between error condition recovery
+unsigned int errors_loop_duration = 60000;        // 60 seconds
+unsigned long errors_loop_start;                  // holds a timestamp for each error loop start
 
 void MQTT_Reconnect() { // MQTT reconnect function
   // Try to reconnect only if it has been more than 5 sec since last attemp
@@ -91,7 +104,6 @@ void Receive_Message_Cloud_App_MQTT(
     char *topic, byte *payload,
     unsigned int length) {      // callback function to receive configuration
                                 // messages from the cloud application by MQTT
-  boolean write_eeprom = false; // to track if writing the eeprom is required
   memcpy(received_payload, payload, length);
   Serial.print("Anaire Cloud Message arrived: ");
   Serial.println(received_payload);
@@ -280,9 +292,9 @@ void Init_MQTT() { // MQTT Init function
   Serial.println(AnaireConfig.MQTT_port);
 
   // Attempt to connect to MQTT broker
-  MQTT_client.setBufferSize(
-      512); // to receive messages up to 512 bytes length (default is 256)
-  MQTT_client.setServer(AnaireConfig.MQTT_server, AnaireConfig.MQTT_port);
+  MQTT_client.setBufferSize(512); // to receive messages up to 512 bytes length (default is 256)
+  // MQTT_client.setServer("test.mosquitto.org", 1883);
+  MQTT_client.setServer("mqtt.anaire.org", 80);
   MQTT_client.setCallback(Receive_Message_Cloud_App_MQTT);
   MQTT_client.connect(anaire_device_id.c_str());
 
@@ -312,9 +324,20 @@ void Get_Anaire_DeviceId() { // Get TTGO T-Display info and fill up anaire_devic
 }
 
 void mqttAnaireLoop() {
-    // MQTT loop
-  if ((millis() - MQTT_loop_start) >= MQTT_loop_duration)
-  {
+
+  // Measurement loop
+  if ((millis() - measurements_loop_start) >= measurements_loop_duration) {
+
+    // New timestamp for the loop start time
+    measurements_loop_start = millis();
+
+    // Accumulates samples
+    CO2ppm_accumulated += co2;
+    CO2ppm_samples++;
+  }
+
+  // MQTT loop
+  if ((millis() - MQTT_loop_start) >= MQTT_loop_duration) {
 
     // New timestamp for the loop start time
     MQTT_loop_start = millis();
@@ -327,50 +350,52 @@ void mqttAnaireLoop() {
     // Reset samples after sending them to the MQTT server
     CO2ppm_accumulated = 0;
     CO2ppm_samples = 0;
-
   }
 
   // Errors loop
-  if ((millis() - errors_loop_start) >= errors_loop_duration)
-  {
+  if ((millis() - errors_loop_start) >= errors_loop_duration) {
 
     // New timestamp for the loop start time
     errors_loop_start = millis();
 
     // Try to recover error conditions
     if (err_sensor) {
-      Serial.println ("--- err_sensor");
-      //Setup_Sensor();  // Init co2 sensors
+      Serial.println("--- err_sensor");
+      // Setup_Sensor();  // Init co2 sensors
     }
 
     if (WiFi.status() != WL_CONNECTED) {
-      Serial.println ("--- err_wifi");
+      Serial.println("--- err_wifi");
       err_wifi = true;
       WiFi.reconnect();
-    }
-    else {
+    } else {
       err_wifi = false;
     }
 
-    //Reconnect MQTT if needed
+    // Reconnect MQTT if needed
     if ((!MQTT_client.connected()) && (!err_wifi)) {
-      Serial.println ("--- err_mqtt");
+      Serial.println("--- err_mqtt");
       err_MQTT = true;
     }
-    
-    //Reconnect MQTT if needed
+
+    // Reconnect MQTT if needed
     if ((err_MQTT) && (!err_wifi)) {
-      Serial.println ("--- MQTT reconnect");
+      Serial.println("--- MQTT reconnect");
       // Attempt to connect to MQTT broker
       MQTT_Reconnect();
       Init_MQTT();
     }
-
   }
 }
 
 void initAnaireCloud() {
     Get_Anaire_DeviceId();
+    // Set MQTT topics
+    MQTT_send_topic = "measurement"; // Measurements are sent to this topic
+    MQTT_receive_topic = "config/" + anaire_device_id; // Config messages will be received in config/id
+    if ((WiFi.status() == WL_CONNECTED)) {
+      Init_MQTT();
+    }
 }
 
 // void mqttReconnectAnaire() {

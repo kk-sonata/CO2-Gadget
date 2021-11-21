@@ -67,6 +67,19 @@ uint64_t lastButtonUpTimeStamp = millis(); // Last time button UP was pressed
 // clang-format off
 /*****************************************************************************************************/
 /*********                                                                                   *********/
+/*********                           INCLUDE BATTERY FUNCTIONALITY                           *********/
+/*********                                                                                   *********/
+/*****************************************************************************************************/
+// clang-format on
+#define ADC_PIN 34
+uint16_t vRef = 1100;
+uint16_t batteryDischargedMillivolts = 3500; // Voltage of battery when we consider it discharged (0%).
+uint16_t batteryFullyChargedMillivolts = 4200; // Voltage of battery when it is considered fully charged (100%).
+#include "CO2_Gadget_Battery.h"
+
+// clang-format off
+/*****************************************************************************************************/
+/*********                                                                                   *********/
 /*********                           INCLUDE WIFI FUNCTIONALITY                              *********/
 /*********                                                                                   *********/
 /*****************************************************************************************************/
@@ -110,19 +123,6 @@ uint64_t lastButtonUpTimeStamp = millis(); // Last time button UP was pressed
 #if defined SUPPORT_OTA
 #include <AsyncElegantOTA.h>
 #endif
-
-// clang-format off
-/*****************************************************************************************************/
-/*********                                                                                   *********/
-/*********                           INCLUDE BATTERY FUNCTIONALITY                           *********/
-/*********                                                                                   *********/
-/*****************************************************************************************************/
-// clang-format on
-#define ADC_PIN 34
-uint16_t vRef = 1100;
-uint16_t batteryDischargedMillivolts = 3500; // Voltage of battery when we consider it discharged (0%).
-uint16_t batteryFullyChargedMillivolts = 4200; // Voltage of battery when it is considered fully charged (100%).
-#include "CO2_Gadget_Battery.h"
 
 // clang-format off
 /*****************************************************************************************************/
@@ -262,10 +262,10 @@ void setup() {
   delay(2000);              // Enjoy the splash screen for 2 seconds
   tft.setTextSize(2);
 #endif
-  initAnaireCloud();
   initBLE();
   initWifi();
   initSensors();  
+  initAnaireCloud();
   initMQTT();
   menu_init();
   buttonsInit();
