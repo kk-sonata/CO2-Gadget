@@ -12,9 +12,7 @@
 #endif
 
 WiFiClient espClient;
-#ifndef DISABLE_WEBSERVER
 AsyncWebServer server(80);
-#endif
 
 void onWifiSettingsChanged(std::string ssid, std::string password) {
   Serial.print("-->[WiFi] WifiSetup: SSID = ");
@@ -294,14 +292,12 @@ void initWifi() {
     server.onNotFound([](AsyncWebServerRequest *request) {
       request->send(400, "text/plain", "Not found");
     });
-    #endif
 
 #ifdef SUPPORT_OTA
     AsyncElegantOTA.begin(&server); // Start ElegantOTA
     Serial.println("OTA ready");
 #endif
 
-#ifndef DISABLE_WEBSERVER
     server.begin();
     Serial.println("-->[WiFi] HTTP server started");
 

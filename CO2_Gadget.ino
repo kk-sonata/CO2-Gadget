@@ -108,7 +108,9 @@ uint16_t batteryFullyChargedMillivolts = 4200; // Voltage of battery when it is 
 /*********                                                                                   *********/
 /*****************************************************************************************************/
 // clang-format on
+#if defined ENABLE_ANAIRECLOUD
 #include "CO2_Gadget_Anaire-Cloud.h"
+#endif
 
 // clang-format off
 /*****************************************************************************************************/
@@ -277,6 +279,9 @@ void setup() {
   initBLE();
   initWifi();
   initSensors();
+  #if defined ENABLE_ANAIRECLOUD
+  initAnaireCloud();
+  #endif
   #ifdef SUPPORT_MQTT
   initMQTT();
   #endif
