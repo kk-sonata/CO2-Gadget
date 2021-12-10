@@ -27,6 +27,7 @@ struct MyConfigStruct {
   // uint16_t CO2ppm_warning_threshold = 700;                    // Warning threshold; default to 700ppm
   // uint16_t CO2ppm_alarm_threshold = 1000;                     // Alarm threshold; default to 1000ppm
   char MQTT_server[24] = "mqtt.anaire.org";                   // MQTT server url or public IP address. Default to Anaire Portal on portal.anaire.org
+  // char MQTT_server[24] = "18.203.38.54";                   // MQTT server url or public IP address. Default to Anaire Portal on portal.anaire.org
   uint16_t MQTT_port = 80;                                    // MQTT port; Default to Anaire Port on 30183
   // boolean acoustic_alarm = true;                              // Global flag to control acoustic alarm; default to true
   // boolean self_calibration = false;                           // Automatic Baseline Correction of CO2 sensor; default to false
