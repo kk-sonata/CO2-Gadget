@@ -430,6 +430,10 @@ void check_status() {
   }
 }
 
+void WebConfigLoop() {
+  check_status();
+}
+
 void initWebConfig() {
   Serial.print(F("\n-->[PORT] Starting captive portal "));
 // Serial.setDebugOutput(false);
@@ -462,7 +466,7 @@ initSTAIPConfigStruct(WM_STA_IPconfig);
   //////
 #endif
 
-  ESPAsync_wifiManager.setSaveConfigCallback(saveConfigCallback);
+  ESPAsync_wifiManager.setSaveConfigCallback(saveConfigCallback); 
 
   Router_SSID = ESPAsync_wifiManager.WiFi_SSID();
   Router_Pass = ESPAsync_wifiManager.WiFi_Pass();
@@ -476,6 +480,8 @@ initSTAIPConfigStruct(WM_STA_IPconfig);
   ssid.toUpperCase();
 
   bool configDataLoaded = loadConfigData();
+
+  ESPAsync_wifiManager.resetSettings();
 
   if (!configDataLoaded)
   {
@@ -528,11 +534,6 @@ initSTAIPConfigStruct(WM_STA_IPconfig);
       wifiMulti.addAP(Router_SSID.c_str(), Router_Pass.c_str());
     }
   }
-}
-
-void WebConfigLoop() {
-  ESPAsync_wifiManager.loop();
-  check_status();
 }
 
 void disableWiFi() {
