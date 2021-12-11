@@ -76,7 +76,20 @@ uint64_t lastButtonUpTimeStamp = millis(); // Last time button UP was pressed
 /*********                                                                                   *********/
 /*****************************************************************************************************/
 // clang-format on
+#ifndef SUPPORT_WEBCONFIG
 #include <CO2_Gadget_WIFI.h>
+#endif
+
+// clang-format off
+/*****************************************************************************************************/
+/*********                                                                                   *********/
+/*********                        INCLUDE WEB CONFIG FUNCTIONALITY                           *********/
+/*********                                                                                   *********/
+/*****************************************************************************************************/
+// clang-format on
+#ifdef SUPPORT_WEBCONFIG
+#include <CO2_Gadget_WebConfig.h>
+#endif
 
 // clang-format off
 /*****************************************************************************************************/
@@ -264,8 +277,12 @@ void setup() {
   delay(2000);              // Enjoy the splash screen for 2 seconds
   tft.setTextSize(2);
 #endif
-  initBLE();
+  initBLE();  
+  #ifdef SUPPORT_WEBCONFIG
+  initWebConfig();
+  #else
   initWifi();
+  #endif
   initSensors();
   #ifdef SUPPORT_MQTT
   initMQTT();
@@ -289,4 +306,7 @@ void loop() {
   displayLoop();
   buttonsLoop();
   nav.poll(); // this device only draws when needed
+#ifdef SUPPORT_WEBCONFIG
+  WebConfigLoop();
+#endif
 }

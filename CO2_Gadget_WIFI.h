@@ -1,3 +1,7 @@
+#ifndef CO2_Gadget_WIFI_h
+#define CO2_Gadget_WIFI_h
+
+#ifndef SUPPORT_WEBCONFIG
 
 // clang-format off
 /*****************************************************************************************************/
@@ -308,3 +312,6 @@ void initWifi() {
     disableWiFi();
   }
 }
+
+#endif  // SUPPORT_WEBCONFIG
+#endif  // CO2_Gadget_WiFi_h

@@ -229,7 +229,11 @@ result doSetActiveWIFI(eventMask e, navNode &nav, prompt &item) {
     activeMQTT = false;
     disableWiFi();
   } else {
+    #ifdef SUPPORT_WEBCONFIG
+    initWebConfig();
+    #else
     initWifi();
+    #endif
     activeMQTT = preferences.getBool("activeMQTT", false);
     if ((activeMQTT) && (WiFi.isConnected())) {
       initMQTT();
