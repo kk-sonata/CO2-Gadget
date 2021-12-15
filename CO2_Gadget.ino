@@ -284,13 +284,13 @@ void setup() {
   delay(2000);              // Enjoy the splash screen for 2 seconds
   tft.setTextSize(2);
 #endif
-#if defined SUPPORT_BLE
-  initBLE();  
-#endif
 #ifdef SUPPORT_WEBCONFIG
   initWebConfig();
 #else
   initWifi();
+#endif
+#if defined SUPPORT_BLE
+  initBLE();  
 #endif
   initSensors();
 #ifdef SUPPORT_MQTT

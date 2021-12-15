@@ -120,6 +120,13 @@ WiFiClient espClient;
 
 AsyncWebServer server(HTTP_PORT);
 
+#if (USING_ESP32_S2 || USING_ESP32_C3)
+  ESPAsync_WiFiManager ESPAsync_wifiManager(&server, NULL, "CO2-Gadget");
+#else
+  DNSServer dnsServer;
+  ESPAsync_WiFiManager ESPAsync_wifiManager(&server, &dnsServer, "CO2-Gadget");
+#endif
+
 // flag for saving data
 bool shouldSaveConfig = false;
 
@@ -198,8 +205,8 @@ int calcChecksum(uint8_t *address, uint16_t sizeToCalc) {
 
 // callback notifying us of the need to save config
 void saveConfigCallback() {
-  Serial.println("Should save config");
-  shouldSaveConfig = true;
+//   Serial.println("Should save config");
+//   shouldSaveConfig = true;
 }
 
 bool loadConfigData() {
@@ -243,26 +250,26 @@ bool loadConfigData() {
 }
 
 void saveConfigData() {
-  File file = FileFS.open(CONFIG_FILENAME, "w");
-  LOGERROR(F("SaveWiFiCfgFile "));
+  // File file = FileFS.open(CONFIG_FILENAME, "w");
+  // LOGERROR(F("SaveWiFiCfgFile "));
 
-  if (file) {
-    WM_config.checksum = calcChecksum(
-        (uint8_t *)&WM_config, sizeof(WM_config) - sizeof(WM_config.checksum));
+  // if (file) {
+  //   WM_config.checksum = calcChecksum(
+  //       (uint8_t *)&WM_config, sizeof(WM_config) - sizeof(WM_config.checksum));
 
-    file.write((uint8_t *)&WM_config, sizeof(WM_config));
+  //   file.write((uint8_t *)&WM_config, sizeof(WM_config));
 
-    displayIPConfigStruct(WM_STA_IPconfig);
+  //   displayIPConfigStruct(WM_STA_IPconfig);
 
-    // New in v1.4.0
-    file.write((uint8_t *)&WM_STA_IPconfig, sizeof(WM_STA_IPconfig));
-    //////
+  //   // New in v1.4.0
+  //   file.write((uint8_t *)&WM_STA_IPconfig, sizeof(WM_STA_IPconfig));
+  //   //////
 
-    file.close();
-    LOGERROR(F("OK"));
-  } else {
-    LOGERROR(F("failed"));
-  }
+  //   file.close();
+  //   LOGERROR(F("OK"));
+  // } else {
+  //   LOGERROR(F("failed"));
+  // }
 }
 
 #if USE_ESP_WIFIMANAGER_NTP
@@ -430,9 +437,7 @@ void check_status() {
   }
 }
 
-void WebConfigLoop() {
-  check_status();
-}
+
 
 void initWebConfig() {
   Serial.print(F("\n-->[PORT] Starting captive portal "));
@@ -440,12 +445,6 @@ void initWebConfig() {
 initAPIPConfigStruct(WM_AP_IPconfig);
 initSTAIPConfigStruct(WM_STA_IPconfig);
 
-#if (USING_ESP32_S2 || USING_ESP32_C3)
-  ESPAsync_WiFiManager ESPAsync_wifiManager(&server, NULL, "CO2-Gadget");
-#else
-  DNSServer dnsServer;
-  ESPAsync_WiFiManager ESPAsync_wifiManager(&server, &dnsServer, "CO2-Gadget");
-#endif
 #if USE_CUSTOM_AP_IP
   // set custom ip for portal
   // New in v1.4.0
@@ -453,10 +452,10 @@ initSTAIPConfigStruct(WM_STA_IPconfig);
   //////
 #endif
 
-  ESPAsync_wifiManager.setMinimumSignalQuality(-1);
+  // ESPAsync_wifiManager.setMinimumSignalQuality(-1);
 
   // Set config portal channel, default = 1. Use 0 => random channel from 1-13
-  ESPAsync_wifiManager.setConfigPortalChannel(0);
+  // ESPAsync_wifiManager.setConfigPortalChannel(0);
   //////
 
 #if !USE_DHCP_IP
@@ -466,20 +465,20 @@ initSTAIPConfigStruct(WM_STA_IPconfig);
   //////
 #endif
 
-  ESPAsync_wifiManager.setSaveConfigCallback(saveConfigCallback); 
+  // ESPAsync_wifiManager.setSaveConfigCallback(saveConfigCallback); 
 
   Router_SSID = ESPAsync_wifiManager.WiFi_SSID();
   Router_Pass = ESPAsync_wifiManager.WiFi_Pass();
 
-  //Remove this line if you do not want to see WiFi password printed
   #ifndef WIFI_PRIVACY
   Serial.println("ESP Self-Stored: SSID = " + Router_SSID + ", Pass = " + Router_Pass);
   #endif
 
   // SSID to uppercase
-  ssid.toUpperCase();
+  // ssid.toUpperCase();
 
   bool configDataLoaded = loadConfigData();
+  // bool configDataLoaded = false;
 
   ESPAsync_wifiManager.resetSettings();
 
@@ -491,49 +490,56 @@ initSTAIPConfigStruct(WM_STA_IPconfig);
       Serial.println(F("We haven't got any access point credentials, so get them now"));
   
       initialConfig = true;
+
+      ESPAsync_wifiManager.autoConnect("AutoConnectAP", "password");
   
       // Starts an access point
-      if (!ESPAsync_wifiManager.startConfigPortal((const char *) ssid.c_str(), password))
-        Serial.println(F("Not connected to WiFi but continuing anyway."));
-      else
-        Serial.println(F("WiFi connected...yeey :)"));
+      // if (!ESPAsync_wifiManager.startConfigPortal((const char *) ssid.c_str(), password))
+      //   Serial.println(F("Not connected to WiFi but continuing anyway."));
+      // else
+      //   Serial.println(F("WiFi connected...yeey :)"));
   
-      memset(&WM_config, 0, sizeof(WM_config));
+      // memset(&WM_config, 0, sizeof(WM_config));
       
-      for (uint8_t i = 0; i < NUM_WIFI_CREDENTIALS; i++)
-      {
-        String tempSSID = ESPAsync_wifiManager.getSSID(i);
-        String tempPW   = ESPAsync_wifiManager.getPW(i);
+      // for (uint8_t i = 0; i < NUM_WIFI_CREDENTIALS; i++)
+      // {
+      //   String tempSSID = ESPAsync_wifiManager.getSSID(i);
+      //   String tempPW   = ESPAsync_wifiManager.getPW(i);
     
-        if (strlen(tempSSID.c_str()) < sizeof(WM_config.WiFi_Creds[i].wifi_ssid) - 1)
-          strcpy(WM_config.WiFi_Creds[i].wifi_ssid, tempSSID.c_str());
-        else
-          strncpy(WM_config.WiFi_Creds[i].wifi_ssid, tempSSID.c_str(), sizeof(WM_config.WiFi_Creds[i].wifi_ssid) - 1);
+      //   if (strlen(tempSSID.c_str()) < sizeof(WM_config.WiFi_Creds[i].wifi_ssid) - 1)
+      //     strcpy(WM_config.WiFi_Creds[i].wifi_ssid, tempSSID.c_str());
+      //   else
+      //     strncpy(WM_config.WiFi_Creds[i].wifi_ssid, tempSSID.c_str(), sizeof(WM_config.WiFi_Creds[i].wifi_ssid) - 1);
   
-        if (strlen(tempPW.c_str()) < sizeof(WM_config.WiFi_Creds[i].wifi_pw) - 1)
-          strcpy(WM_config.WiFi_Creds[i].wifi_pw, tempPW.c_str());
-        else
-          strncpy(WM_config.WiFi_Creds[i].wifi_pw, tempPW.c_str(), sizeof(WM_config.WiFi_Creds[i].wifi_pw) - 1);  
+      //   if (strlen(tempPW.c_str()) < sizeof(WM_config.WiFi_Creds[i].wifi_pw) - 1)
+      //     strcpy(WM_config.WiFi_Creds[i].wifi_pw, tempPW.c_str());
+      //   else
+      //     strncpy(WM_config.WiFi_Creds[i].wifi_pw, tempPW.c_str(), sizeof(WM_config.WiFi_Creds[i].wifi_pw) - 1);  
   
-        // Don't permit NULL SSID and password len < MIN_AP_PASSWORD_SIZE (8)
-        if ( (String(WM_config.WiFi_Creds[i].wifi_ssid) != "") && (strlen(WM_config.WiFi_Creds[i].wifi_pw) >= MIN_AP_PASSWORD_SIZE) )
-        {
-          LOGERROR3(F("* Add SSID = "), WM_config.WiFi_Creds[i].wifi_ssid, F(", PW = "), WM_config.WiFi_Creds[i].wifi_pw );
-          wifiMulti.addAP(WM_config.WiFi_Creds[i].wifi_ssid, WM_config.WiFi_Creds[i].wifi_pw);
-        }
-      }
+      //   // Don't permit NULL SSID and password len < MIN_AP_PASSWORD_SIZE (8)
+      //   if ( (String(WM_config.WiFi_Creds[i].wifi_ssid) != "") && (strlen(WM_config.WiFi_Creds[i].wifi_pw) >= MIN_AP_PASSWORD_SIZE) )
+      //   {
+      //     LOGERROR3(F("* Add SSID = "), WM_config.WiFi_Creds[i].wifi_ssid, F(", PW = "), WM_config.WiFi_Creds[i].wifi_pw );
+      //     wifiMulti.addAP(WM_config.WiFi_Creds[i].wifi_ssid, WM_config.WiFi_Creds[i].wifi_pw);
+      //   }
+      // }
   
       // New in v1.4.0
-      ESPAsync_wifiManager.getSTAStaticIPConfig(WM_STA_IPconfig);
+      // ESPAsync_wifiManager.getSTAStaticIPConfig(WM_STA_IPconfig);
       //////
       
-      saveConfigData();
+      // saveConfigData();
     }
     else
     {
       wifiMulti.addAP(Router_SSID.c_str(), Router_Pass.c_str());
     }
   }
+}
+
+void WebConfigLoop() {
+  ESPAsync_wifiManager.loop();
+  check_status();
 }
 
 void disableWiFi() {
