@@ -107,7 +107,9 @@ uint64_t lastButtonUpTimeStamp = millis(); // Last time button UP was pressed
 /*********                                                                                   *********/
 /*****************************************************************************************************/
 // clang-format on
+#if defined SUPPORT_BLE
 #include "CO2_Gadget_BLE.h"
+#endif
 
 // clang-format off
 /*****************************************************************************************************/
@@ -221,7 +223,9 @@ void readingsLoop() {
       lastReadingsCommunicationTime = esp_timer_get_time();
       newReadingsAvailable = false;
       nav.idleChanged = true; // Must redraw display as there are new readings
+      #if defined SUPPORT_BLE
       publishBLE();
+      #endif      
       // Provide the sensor values for Tools -> Serial Monitor or Serial Plotter
       // Serial.printf("CO2[ppm]:%d\tTemperature[\u00B0C]:%.2f\tHumidity[%%]:%.2f\n", co2, temp, hum);
       if ((activeWIFI) && (WiFi.status() != WL_CONNECTED)) {
@@ -280,16 +284,18 @@ void setup() {
   delay(2000);              // Enjoy the splash screen for 2 seconds
   tft.setTextSize(2);
 #endif
+#if defined SUPPORT_BLE
   initBLE();  
-  #ifdef SUPPORT_WEBCONFIG
+#endif
+#ifdef SUPPORT_WEBCONFIG
   initWebConfig();
-  #else
+#else
   initWifi();
-  #endif
+#endif
   initSensors();
-  #ifdef SUPPORT_MQTT
+#ifdef SUPPORT_MQTT
   initMQTT();
-  #endif
+#endif
   menu_init();
   buttonsInit();
   WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG,
@@ -302,7 +308,9 @@ void loop() {
   sensorsLoop();
   processPendingCommands();
   readingsLoop();
+#if defined SUPPORT_BLE
   BLELoop();
+#endif
 #ifdef SUPPORT_OTA
   AsyncElegantOTA.loop();
 #endif

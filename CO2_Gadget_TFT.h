@@ -169,11 +169,13 @@ void showVoltageTFT(int32_t posX, int32_t posY) {
 }
 
 void showBLEDeviceIdTFT(int32_t posX, int32_t posY) {  
+  #if defined SUPPORT_BLE
   if (activeBLE) {
     tft.setTextColor(TFT_WHITE, TFT_BLACK);
     tft.setTextDatum(BR_DATUM); // bottom right
     tft.drawString(gadgetBle.getDeviceIdString(), posX, posY);
   }
+  #endif
 }
 
 void showCO2TFT(uint16_t co2) {

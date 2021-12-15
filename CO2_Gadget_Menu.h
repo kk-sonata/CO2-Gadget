@@ -535,7 +535,9 @@ MENU(informationMenu, "Information", doNothing, noEvent, wrapStyle
   ,OP("Comp" BUILD_GIT, doNothing, noEvent)
   ,OP("Version" CO2_GADGET_VERSION CO2_GADGET_REV, doNothing, noEvent)
   ,EDIT("IP", tempIPAddress, alphaNum, doNothing, noEvent, wrapStyle)
+  #if defined SUPPORT_BLE
   ,EDIT("BLE Dev. Id", tempBLEDeviceId, alphaNum, doNothing, noEvent, wrapStyle)  
+  #endif
   ,EXIT("<Back"));
 
 // when entering main menu
@@ -711,12 +713,14 @@ void loadTempArraysWithActualValues() {
   Serial.println("#");
   #endif
 
+  #if defined SUPPORT_BLE
   paddedString = rightPad(gadgetBle.getDeviceIdString(), 30);
   paddedString.toCharArray(tempBLEDeviceId, paddedString.length());  
   #ifdef DEBUG_ARDUINOMENU
   Serial.print("-->[MENU] tempBLEDeviceId: #");
   Serial.print(tempBLEDeviceId);
   Serial.println("#");
+  #endif
   #endif
 
   
