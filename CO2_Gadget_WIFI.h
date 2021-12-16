@@ -1,7 +1,7 @@
 #ifndef CO2_Gadget_WIFI_h
 #define CO2_Gadget_WIFI_h
 
-#ifndef SUPPORT_WEBCONFIG
+#ifndef SUPPORT_WEBCONFIG2
 
 // clang-format off
 /*****************************************************************************************************/
@@ -250,7 +250,7 @@ void initWifi() {
     Serial.printf("-->[WiFi] Setting hostname %s: %d\n", hostName.c_str(),
                   WiFi.setHostname(hostName.c_str()));
     WiFi.begin(wifiSSID.c_str(), wifiPass.c_str());
-    Serial.print("-->[WiFi] Connecting to WiFi");
+    Serial.print("-->[WiFi] Connecting to WiFi\n");
     while (WiFi.status() != WL_CONNECTED) {
       ++connectionRetries;
       if (connectionRetries==maxConnectionRetries) {
@@ -283,7 +283,8 @@ void initWifi() {
       request->send(response);
     });*/
     SPIFFS.begin();
-    server.serveStatic("/", SPIFFS, "/").setDefaultFile("index.html");
+    // server.serveStatic("/", SPIFFS, "/").setDefaultFile("index.html");
+    server.serveStatic("/main", SPIFFS, "/").setDefaultFile("index.html");
     server.on("/readCO2", HTTP_GET, [](AsyncWebServerRequest *request) {
       request->send(200, "text/plain", String(co2));
     });

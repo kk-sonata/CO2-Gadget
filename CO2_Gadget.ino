@@ -76,7 +76,7 @@ uint64_t lastButtonUpTimeStamp = millis(); // Last time button UP was pressed
 /*********                                                                                   *********/
 /*****************************************************************************************************/
 // clang-format on
-#ifndef SUPPORT_WEBCONFIG
+#ifndef SUPPORT_WEBCONFIG2
 #include <CO2_Gadget_WIFI.h>
 #endif
 
@@ -286,6 +286,7 @@ void setup() {
 #endif
 #ifdef SUPPORT_WEBCONFIG
   initWebConfig();
+  initWifi();
 #else
   initWifi();
 #endif

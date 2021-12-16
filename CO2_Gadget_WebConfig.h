@@ -38,6 +38,7 @@ typedef struct {
 } WiFi_Credentials_String;
 
 #define NUM_WIFI_CREDENTIALS 2
+#define USE_STATIC_IP_CONFIG_IN_CP false
 
 // Assuming max 49 chars
 #define TZNAME_MAX_LEN 50
@@ -116,9 +117,9 @@ WiFiMulti wifiMulti;
 #include "credentials.h"
 #endif
 
-WiFiClient espClient;
+// WiFiClient espClient;
 
-AsyncWebServer server(HTTP_PORT);
+// AsyncWebServer server(HTTP_PORT);
 
 #if (USING_ESP32_S2 || USING_ESP32_C3)
   ESPAsync_WiFiManager ESPAsync_wifiManager(&server, NULL, "CO2-Gadget");
@@ -210,43 +211,44 @@ void saveConfigCallback() {
 }
 
 bool loadConfigData() {
-  File file = FileFS.open(CONFIG_FILENAME, "r");
-  LOGERROR(F("LoadWiFiCfgFile "));
+  // File file = FileFS.open(CONFIG_FILENAME, "r");
+  // LOGERROR(F("LoadWiFiCfgFile "));
 
-  memset((void *)&WM_config, 0, sizeof(WM_config));
+  // memset((void *)&WM_config, 0, sizeof(WM_config));
 
-  // New in v1.4.0
-  memset((void *)&WM_STA_IPconfig, 0, sizeof(WM_STA_IPconfig));
-  //////
+  // // New in v1.4.0
+  // memset((void *)&WM_STA_IPconfig, 0, sizeof(WM_STA_IPconfig));
+  // //////
 
-  if (file) {
-    file.readBytes((char *)&WM_config, sizeof(WM_config));
+  // if (file) {
+  //   file.readBytes((char *)&WM_config, sizeof(WM_config));
 
-    // New in v1.4.0
-    file.readBytes((char *)&WM_STA_IPconfig, sizeof(WM_STA_IPconfig));
-    //////
+  //   // New in v1.4.0
+  //   file.readBytes((char *)&WM_STA_IPconfig, sizeof(WM_STA_IPconfig));
+  //   //////
 
-    file.close();
-    LOGERROR(F("OK"));
+  //   file.close();
+  //   LOGERROR(F("OK"));
 
-    if (WM_config.checksum !=
-        calcChecksum((uint8_t *)&WM_config,
-                     sizeof(WM_config) - sizeof(WM_config.checksum))) {
-      LOGERROR(F("WM_config checksum wrong"));
+  //   if (WM_config.checksum !=
+  //       calcChecksum((uint8_t *)&WM_config,
+  //                    sizeof(WM_config) - sizeof(WM_config.checksum))) {
+  //     LOGERROR(F("WM_config checksum wrong"));
 
-      return false;
-    }
+  //     return false;
+  //   }
 
-    // New in v1.4.0
-    displayIPConfigStruct(WM_STA_IPconfig);
-    //////
+  //   // New in v1.4.0
+  //   displayIPConfigStruct(WM_STA_IPconfig);
+  //   //////
 
-    return true;
-  } else {
-    LOGERROR(F("failed"));
+  //   return true;
+  // } else {
+  //   LOGERROR(F("failed"));
 
-    return false;
-  }
+  //   return false;
+  // }
+  return false;
 }
 
 void saveConfigData() {
@@ -538,15 +540,15 @@ initSTAIPConfigStruct(WM_STA_IPconfig);
 }
 
 void WebConfigLoop() {
-  ESPAsync_wifiManager.loop();
+  // ESPAsync_wifiManager.loop();
   check_status();
 }
 
-void disableWiFi() {
-  WiFi.disconnect(true);  // Disconnect from the network
-  WiFi.mode(WIFI_OFF);    // Switch WiFi off
-  Serial.println("-->[WiFi] WiFi dissabled!");
-}
+// void disableWiFi() {
+//   WiFi.disconnect(true);  // Disconnect from the network
+//   WiFi.mode(WIFI_OFF);    // Switch WiFi off
+//   Serial.println("-->[WiFi] WiFi dissabled!");
+// }
 
 #endif  // SUPPORT_WEBCONFIG
 #endif  // CO2_Gadget_WebConfig_h
