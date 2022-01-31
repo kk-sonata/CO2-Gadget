@@ -69,8 +69,6 @@ result systemReboot() {
 //note that first parameter is the class name
 altMENU(confirmReboot, subMenu, "Reboot?", doNothing, noEvent, wrapStyle, (Menu::_menuData | Menu::_canNav), OP("Yes", systemReboot, enterEvent), EXIT("Cancel"));
 
-char tempIPAddress[16];
-
 // list of allowed characters
 const char *const digit = "0123456789";
 const char *const hexChars MEMMODE = "0123456789ABCDEF";
@@ -86,11 +84,13 @@ char tempMQTTClientId[] = "                              ";
 char tempMQTTBrokerIP[] = "                              ";
 char tempMQTTUser[] = "                              ";
 char tempMQTTPass[] = "                              ";
-char tempWiFiSSID[] = "                              ";
-char tempWiFiPasswrd[] = "                              ";
+char tempWiFiSSID[] = "                                ";
+char tempWiFiPasswrd[] = "                                                                   ";
 char tempHostName[] = "                              ";
 char tempBLEDeviceId[] = "                              ";
 char tempCO2Sensor[] = "                              ";
+char tempIPAddress[16];
+
 
 void setInMenu(bool isInMenu) {
     inMenu = isInMenu;
@@ -221,7 +221,7 @@ MENU(calibrationMenu, "Calibration", doNothing, noEvent, wrapStyle
   ,OP("Calibrate at 400ppm", doCalibration400ppm, enterEvent)
   ,FIELD(customCalibrationValue, "Custom Cal: ", "ppm", 400, 2000, 10, 10, showEvent, enterEvent, noStyle)
   ,OP("Calibrate at custom ppm", doCalibrationCustom, enterEvent)
-  EXIT("<Back"));
+  ,EXIT("<Back"));
   // ,OP("Test menu event", showEvent, anyEvent),
 
 int8_t setCO2Sensor;
@@ -349,7 +349,7 @@ result doSetWiFiPasswrd(eventMask e, navNode &nav, prompt &item) {
 
 result doSetHostName(eventMask e, navNode &nav, prompt &item) {
 #ifdef DEBUG_ARDUINOMENU
-  Serial.printf("-->[MENU] Setting WiFi Password to #%s#\n", tempWiFiPasswrd);
+  Serial.printf("-->[MENU] Setting HostName to #%s#\n", tempHostName);
   Serial.print(F("-->[MENU] action1 event:"));
   Serial.println(e);
   Serial.flush();
@@ -369,7 +369,6 @@ MENU(wifiConfigMenu, "WIFI Config", doNothing, noEvent, wrapStyle
   ,EDIT("Pass:", tempWiFiPasswrd, allChars, doSetWiFiPasswrd, exitEvent, wrapStyle)
   ,EDIT("Host:", tempHostName, allChars, doSetHostName, exitEvent, wrapStyle)
   ,EXIT("<Back"));
-
 
 result doSetMQTTTopic(eventMask e, navNode &nav, prompt &item) {
 #ifdef DEBUG_ARDUINOMENU
@@ -859,7 +858,7 @@ void loadTempArraysWithActualValues() {
     Serial.println("#");
 #endif
 
-    paddedString = rightPad(wifiSSID, 30);
+    paddedString = rightPad(wifiSSID, 32);
     paddedString.toCharArray(tempWiFiSSID, paddedString.length());
 #ifdef DEBUG_ARDUINOMENU
     Serial.print("-->[MENU] tempWiFiSSID: #");
@@ -868,10 +867,10 @@ void loadTempArraysWithActualValues() {
 #endif
 
 #ifdef WIFI_PRIVACY
-    paddedString = rightPad(" ", 30);
+    paddedString = rightPad(" ", 67);
     paddedString.toCharArray(tempWiFiPasswrd, paddedString.length());
 #else
-    paddedString = rightPad(wifiPass, 30);
+    paddedString = rightPad(wifiPass, 67);
     paddedString.toCharArray(tempWiFiPasswrd, paddedString.length());
 #endif
 #ifdef DEBUG_ARDUINOMENU
