@@ -95,7 +95,7 @@ void initPreferences() {
   wifiSSID = preferences.getString("wifiSSID", wifiSSID).c_str();
   wifiPass = preferences.getString("wifiPass", wifiPass).c_str();
   hostName = preferences.getString("hostName", hostName).c_str();
-  selectedCO2Sensor = preferences.getUInt("selCO2Sensor", 0);
+  selectedCO2Sensor = preferences.getUInt("selCO2Sensor", 4);   //default MHZ19
   debugSensors = preferences.getBool("debugSensors", false);
   displayReverse = preferences.getBool("displayReverse", false);
   showFahrenheit = preferences.getBool("showFahrenheit", false);

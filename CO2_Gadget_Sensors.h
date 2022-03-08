@@ -96,7 +96,7 @@ void initSensors() {
   } else if (selectedCO2Sensor == MHZ19) {
     Serial.println("-->[SENS] Trying to init CO2 sensor: MHZ19(A/B/C/D)");
     sensors.detectI2COnly(false);
-    sensors.init(MHZ19);
+    sensors.init(MHZ19, 16, 17);  //RX2, TX2
   } else if (selectedCO2Sensor == CM1106) {
     Serial.println("-->[SENS] Trying to init CO2 sensor: CM1106");
     sensors.detectI2COnly(false);

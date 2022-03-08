@@ -15,14 +15,17 @@
 #include <U8g2lib.h>
 #include "bootlogo.h"
 #include "icons.h"
-U8G2_SH1106_128X64_NONAME_1_HW_I2C u8g2(U8G2_R0, /* reset=*/ U8X8_PIN_NONE); // Frame Buffer: clearBuffer/sendBuffer. More RAM usage, Faster
+// U8G2_SH1106_128X64_NONAME_1_HW_I2C u8g2(U8G2_R0, /* reset=*/ U8X8_PIN_NONE); // Frame Buffer: clearBuffer/sendBuffer. More RAM usage, Faster
 // U8G2_SH1106_128X64_NONAME_F_HW_I2C u8g2(U8G2_R0, /* reset=*/ U8X8_PIN_NONE); // Page Buffer: firstPage/nextPage. Less RAM usage, Slower
+//U8G2_SSD1306_64X48_ER_F_HW_I2C u8g2(U8G2_R0);
+U8G2_SSD1306_64X48_ER_1_HW_I2C u8g2(U8G2_R0, /* reset=*/ U8X8_PIN_NONE); // Frame Buffer: clearBuffer/sendBuffer. More RAM usage, Faster
 
 char oled_msg[20];
-int displayWidth = 128;
-int displayHeight = 64;
+int displayWidth = 64;
+int displayHeight = 48;
 // #define MENUFONT u8g2_font_6x10_mf
-#define MENUFONT u8g2_font_5x8_mf
+//#define MENUFONT u8g2_font_5x8_mf
+#define MENUFONT u8g2_font_tom_thumb_4x6_mf 
 
 void setDisplayBrightness(uint32_t newBrightness) {
   Serial.printf("-->[OLED] Setting display brightness value at %d\n", newBrightness);
@@ -40,7 +43,8 @@ void displaySplashScreen() {
     // u8g2.drawXBMP(30, 0, 59, 20, eMarieteLogo);
     // u8g2.drawXBM(7, 23, 46, 36, CO2Logo);
     // u8g2.drawXBM(60, 32, 61, 23, GadgetLogo);
-    u8g2.drawXBM(0, 0, 128, 64, splash);
+    //u8g2.drawXBM(0, 0, 128, 64, splash);
+    u8g2.drawXBM(0, 0, 64, 48, splash);    //new res
   } while (u8g2.nextPage());
   u8g2.setFont(MENUFONT);
 }
@@ -86,11 +90,12 @@ void initDisplay() {
 void displayShowValues(uint16_t co2) {
     u8g2.firstPage();
     do {
-        u8g2.setFont(u8g2_font_7Segments_26x42_mn);
-        u8g2.setCursor(0, 44);
+        //u8g2.setFont(u8g2_font_7Segments_26x42_mn);
+        u8g2.setFont(u8g2_font_chargen_92_me);
+        u8g2.setCursor(18, 32);
         u8g2.print(co2);
         u8g2.setFont(u8g2_font_5x7_tf);
-        u8g2.setCursor(110, 51);
+        u8g2.setCursor(35, 39);
         u8g2.print("ppm");
         if (displayShowTemperature) {
             u8g2.setCursor(1, u8g2.getDisplayHeight());
