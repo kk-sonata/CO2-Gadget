@@ -862,8 +862,8 @@ const colorDef<uint8_t> colors[6] MEMMODE={
 // #define fontY 16
 #define offsetX 1
 #define offsetY 2
-#define U8_Width 64
-#define U8_Height 48
+#define U8_Width OLED_WIDTH
+#define U8_Height OLED_HEIGHT
 #define USE_HWI2C
 #define fontMarginX 2
 #define fontMarginY 2
